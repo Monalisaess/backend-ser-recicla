@@ -1,5 +1,6 @@
 import pg from "pg";
 import dotenv from "dotenv";
+import { Error, Client, Release } from "pg";
 
 dotenv.config();
 
@@ -7,10 +8,10 @@ const { Pool } = pg;
 
 const pool = new Pool({
   connectionString:
-    "postgres://postgres:tTsQlOHshTGVEVlLHyXdLdgaQpDxsQWJ@containers-us-west-207.railway.app:5432/railway",
+    "postgresql://postgres:tTsQlOHshTGVEVlLHyXdLdgaQpDxsQWJ@gondola.proxy.rlwy.net:41192/railway",
 });
 
-pool.connect((err, client, release) => {
+pool.connect((err: Error, client: Client, release: Release) => {
   if (err) {
     console.error("Erro ao conectar ao banco de dados:", err);
   } else {
