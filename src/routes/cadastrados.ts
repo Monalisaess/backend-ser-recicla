@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
-import pool from "../db";
+import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient();
 const router = Router();
 
 interface UserRequest extends Request {
@@ -19,11 +20,15 @@ router.post("/", async (req: UserRequest, res: Response) => {
   }
 
   try {
-    const result = await pool.query(
-      "INSERT INTO users (email, name, password) VALUES ($1, $2, $3) RETURNING *",
-      [email, name, password],
-    );
-    res.status(200).json(result.rows[0]);
+    const newUser = await prisma.user.create({
+      data: {
+        email,
+        name,
+        password,
+      },
+    });
+
+    res.status(200).json(newUser);
   } catch (err) {
     console.error("Erro ao cadastrar:", err);
     res.status(500).json({ error: "Erro no cadastro" });
