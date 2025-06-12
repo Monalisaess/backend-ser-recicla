@@ -7,24 +7,23 @@ const router = Router();
 interface UserRequest extends Request {
   body: {
     email: string;
-    name: string;
-    password: string;
+    nome: string;
+    senha: string;
   };
 }
 
 router.post("/", async (req: UserRequest, res: Response) => {
-  const { email, name, password } = req.body;
-
-  if (!email || !name || !password) {
+  const { email, nome, senha } = req.body;
+  if (!email || !nome || !senha) {
     return res.status(400).json({ error: "Email, nome e senha obrigatórios" });
   }
 
   try {
-    const newUser = await prisma.user.create({
+    const newUser = await prisma.users.create({
       data: {
         email,
-        name,
-        password,
+        nome,
+        senha,
       },
     });
 
