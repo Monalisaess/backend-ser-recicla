@@ -24,11 +24,20 @@ model Curso {
 
 model Registro {
   id_registro Int @id @default(autoincrement())
-  tipo String
+  id_tipo_registro Int
   peso_em_gramas Decimal @db.Decimal(10, 2)
   timestamp DateTime @default(now())
   id_curso Int
-  curso Curso @relation(fields: [id_curso], references: [id_curso])  
+  curso Curso @relation(fields: [id_curso], references: [id_curso], onDelete: Cascade)
+  tipo TipoRegistro @relation(fields: [id_tipo_registro], references: [id_tipo_registro], onDelete: Cascade)
 
   @@map("registro")
+}
+
+model TipoRegistro {
+  id_tipo_registro Int @id @default(autoincrement())
+  tipo String
+  registros Registro[]
+
+  @@map("tipo_registro")
 }

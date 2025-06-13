@@ -1,8 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import router from "./routes/cadastrados";
-import authRouter from "./routes/auth";
+import router from "./modules/shared/http/routes/cadastrados";
+import authRouter from "./modules/shared/http/routes/auth";
 
 dotenv.config();
 
