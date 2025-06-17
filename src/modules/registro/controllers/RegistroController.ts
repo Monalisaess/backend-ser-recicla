@@ -1,7 +1,10 @@
 import { RegistroService } from "../services/RegistroService";
+import { CursoService } from "../services/CursoService";
 import { Request, Response } from "express";
 import { IRegistroRepository } from "../repository/IRegistroRepository";
 import { RegistroRepository } from "../repository/RegistroRepository";
+import { ICursoRepository } from "../repository/ICursoRepository";
+import { CursoRepository } from "../repository/CursoRepository";
 import {
   RegistroDTO,
   CreateRegistrosDTO,
@@ -13,11 +16,10 @@ class RegistroController {
   private readonly registroService: RegistroService;
   private readonly cursoService: CursoService;
 
-  constructor() {
+  constructor(registroService: RegistroService, cursoService: CursoService) {
     const repository: IRegistroRepository = new RegistroRepository();
-    const service = new RegistroService(repository);
-
-    this.registroService = service;
+    this.registroService = registroService;
+    this.cursoService = cursoService;
   }
 
   async createRegistro(req: Request, res: Response): Promise<Response> {
