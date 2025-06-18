@@ -5,7 +5,6 @@ const registroSchema = z.object({
     .string()
     .min(1, "O tipo do registro deve ser especificado obrigatoriamente"),
   quantidade: z.number().gt(0, "O valor deve ser maior que zero"),
-  curso: z.string().min(1, "O curso deve ser especificado obrigatoriamente"),
   unidade: z.enum(["G", "U"]),
 });
 
@@ -16,12 +15,25 @@ const createRegistrosSchema = z.object({
     .min(1, "Deve haver pelo menos um registro"),
 });
 
+//generic registro dto
+const registroDto = z.object({
+  id: z.number(),
+  tipo_registro: z.string(),
+  curso: z.string(),
+  quantidade: z.number(),
+  unidade: z.string(),
+  timestamp: z.string().datetime(),
+});
+
 type CreateRegistrosDTO = z.infer<typeof createRegistrosSchema>;
-type RegistroDTO = z.infer<typeof registroSchema>;
+type CreateRegistroDTO = z.infer<typeof registroSchema>;
+type RegistroDTO = z.infer<typeof registroDto>;
 
 export {
   CreateRegistrosDTO,
   createRegistrosSchema,
-  RegistroDTO,
+  CreateRegistroDTO,
   registroSchema,
+  registroDto,
+  RegistroDTO,
 };

@@ -1,37 +1,34 @@
 import { RegistroService } from "../services/RegistroService";
-import { CursoService } from "../services/CursoService";
-import { Request, Response } from "express";
-import { IRegistroRepository } from "../repository/IRegistroRepository";
-import { RegistroRepository } from "../repository/RegistroRepository";
-import { ICursoRepository } from "../repository/ICursoRepository";
-import { CursoRepository } from "../repository/CursoRepository";
+import { Request, Response, NextFunction } from "express";
 import {
   RegistroDTO,
+  CreateRegistroDTO,
   CreateRegistrosDTO,
   createRegistrosSchema,
 } from "../dtos/RegistroDTOs";
-import { APIError } from "../../shared/errors/APIError";
 
 class RegistroController {
   private readonly registroService: RegistroService;
-  private readonly cursoService: CursoService;
 
-  constructor(registroService: RegistroService, cursoService: CursoService) {
-    const repository: IRegistroRepository = new RegistroRepository();
+  constructor(registroService: RegistroService) {
     this.registroService = registroService;
-    this.cursoService = cursoService;
   }
 
-  async createRegistro(req: Request, res: Response): Promise<Response> {
+  public async createRegistro(
+    req: Request,
+    res: Response,
+    nextFunction: NextFunction,
+  ) {
+    console.log("REGISTRANDO REGISTROS...");
     try {
-      const registrosDto: CreateRegistrosDTO = createRegistrosSchema.parse(
-        req.body,
-      );
+      const dto: CreateRegistrosDTO = createRegistrosSchema.parse(req.body);
+      const response = await this.registroService.createRegistros(dto);
 
-      const registro = await this.registroService.createRegistros(registrosDto);
-      return res.status(201).json(registro);
+      return res.json({ message: response });
     } catch (error) {
-      return res.status(500).json({ error: "" });
+      nextFunction(error);
     }
   }
 }
+
+export { RegistroController };

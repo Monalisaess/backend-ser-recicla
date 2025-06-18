@@ -1,0 +1,9 @@
+import { TipoRegistro } from "@prisma/client";
+
+interface ITipoRegistroRepository {
+  findManyByNome(nomes: Set<string>): Promise<TipoRegistro[]>;
+  createByName(nome: string): Promise<TipoRegistro>;
+  findById(id: string): Promise<TipoRegistro>;
+}
+
+export { ITipoRegistroRepository };

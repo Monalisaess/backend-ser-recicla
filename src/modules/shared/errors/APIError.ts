@@ -1,11 +1,12 @@
-class APIError {
-  public readonly message: string;
+class APIError extends Error {
   public readonly statusCode: number;
 
   constructor(message: string, statusCode: number = 500) {
-    this.message = message;
+    super(message);
     this.statusCode = statusCode;
+
+    Error.captureStackTrace(this, this.constructor);
   }
 }
 
-export { APIError };
+export default APIError;
