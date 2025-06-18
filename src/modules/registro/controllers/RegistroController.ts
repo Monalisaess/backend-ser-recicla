@@ -19,7 +19,7 @@ class RegistroController {
     res: Response,
     nextFunction: NextFunction,
   ) {
-    console.log("REGISTRANDO REGISTROS...");
+    console.info("REGISTRANDO REGISTROS...");
     try {
       const dto: CreateRegistrosDTO = createRegistrosSchema.parse(req.body);
       const response = await this.registroService.createRegistros(dto);

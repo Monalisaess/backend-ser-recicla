@@ -26,3 +26,5 @@ class TipoRegistroRepository implements ITipoRegistroRepository {
     throw new Error("Method not implemented.");
   }
 }
+
+export { TipoRegistroRepository };
