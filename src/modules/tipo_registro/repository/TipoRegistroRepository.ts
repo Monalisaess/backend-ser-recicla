@@ -19,6 +19,20 @@ class TipoRegistroRepository implements ITipoRegistroRepository {
       return tipoRegistros;
     }
   }
+
+  public async findByNome(nome: string): Promise<TipoRegistro> {
+    const tipoRegistro = await prisma.tipoRegistro.findFirst({
+      where: {
+        tipo: nome,
+      }
+    })
+
+    if (!tipoRegistro) {
+      throw new APIError("Nenhum tipo de registro encontrado.", 404);
+    } else {
+      return tipoRegistro;
+    }
+  }
   createByName(nome: string): Promise<TipoRegistro> {
     throw new Error("Method not implemented.");
   }

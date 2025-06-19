@@ -25,9 +25,18 @@ const registroDto = z.object({
   timestamp: z.string().datetime(),
 });
 
+//registro de entrada
+const createRegistroInput = z.object({
+  id_tipo_registro: z.number(),
+  quantidade: z.number(),
+  id_curso: z.number(),
+  unidade: z.enum(["GRAMAS", "UNIDADES"]),
+});
+
 type CreateRegistrosDTO = z.infer<typeof createRegistrosSchema>;
 type CreateRegistroDTO = z.infer<typeof registroSchema>;
 type RegistroDTO = z.infer<typeof registroDto>;
+type CreateRegistroInput = z.infer<typeof createRegistroInput>;
 
 export {
   CreateRegistrosDTO,
@@ -36,4 +45,6 @@ export {
   registroSchema,
   registroDto,
   RegistroDTO,
+  CreateRegistroInput,
+  createRegistroInput,
 };

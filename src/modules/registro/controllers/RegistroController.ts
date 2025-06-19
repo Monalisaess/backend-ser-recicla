@@ -24,7 +24,7 @@ class RegistroController {
       const dto: CreateRegistrosDTO = createRegistrosSchema.parse(req.body);
       const response = await this.registroService.createRegistros(dto);
 
-      return res.json({ message: response });
+      return res.json({ message: "Registros Feitos com sucesso!", registros: response });
     } catch (error) {
       nextFunction(error);
     }
