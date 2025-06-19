@@ -15,22 +15,22 @@ model users {
 }
 
 model Curso {
-  id_curso Int @id @default(autoincrement())
-  nome_curso String @unique
-  registros Registro[]
+  id_curso   Int        @id @default(autoincrement())
+  nome_curso String     @unique
+  registros  Registro[]
 
   @@map("curso")
 }
 
 model Registro {
-  id_registro Int @id @default(autoincrement())
+  id_registro      Int          @id @default(autoincrement())
   id_tipo_registro Int
-  quantidade Decimal @db.Decimal(10, 2)
-  timestamp DateTime @default(now())
-  id_curso Int
-  curso Curso @relation(fields: [id_curso], references: [id_curso], onDelete: Cascade)
-  tipo TipoRegistro @relation(fields: [id_tipo_registro], references: [id_tipo_registro], onDelete: Cascade)
-  unidade UNIDADE @default(GRAMAS)
+  quantidade       Decimal      @db.Decimal(10, 2)
+  timestamp        DateTime     @default(now())
+  id_curso         Int
+  curso            Curso        @relation(fields: [id_curso], references: [id_curso], onDelete: Cascade)
+  tipo             TipoRegistro @relation(fields: [id_tipo_registro], references: [id_tipo_registro], onDelete: Cascade)
+  unidade          UNIDADE      @default(GRAMAS)
 
   @@map("registro")
 }
@@ -41,9 +41,17 @@ enum UNIDADE {
 }
 
 model TipoRegistro {
-  id_tipo_registro Int @id @default(autoincrement())
-  tipo String
-  registros Registro[]
+  id_tipo_registro Int        @id @default(autoincrement())
+  tipo             String     @unique
+  registros        Registro[]
 
   @@map("tipo_registro")
+}
+
+model AppConfig {
+  id                  Int       @id @default(autoincrement())
+  is_initialized      Boolean   @default(false)
+  last_initialized_at DateTime?
+
+  @@map("app_config")
 }

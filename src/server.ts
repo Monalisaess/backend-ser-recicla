@@ -3,23 +3,35 @@ import cors from "cors";
 import dotenv from "dotenv";
 import errorHandler from "./middlewares/ErrorHandler";
 import { routes } from "./modules/shared/http/routes/routes";
+import initializeDatabase from "./database/initDb";
+import Logger from "./modules/shared/utils/Logger";
 
-dotenv.config();
+const logger = new Logger("server.ts");
 
-const app = express();
-app.use(express.json());
-app.use(cors());
+async function bootstrap(): Promise<void> {
+  dotenv.config();
 
-//rotas
-console.log("Iniciando rotas...");
-app.use(routes);
+  const app = express();
+  app.use(express.json());
+  app.use(cors());
 
-//midlewares
-console.log("Iniciando middlewares...");
-app.use(errorHandler);
+  await initializeDatabase();
 
-const port = process.env.PORT || 3001;
+  //rotas
+  console.log("Iniciando rotas...");
+  app.use(routes);
 
-app.listen(port, () => {
-  console.log(`Server rodando na porta ${port}`);
+  //midlewares
+  console.log("Iniciando middlewares...");
+  app.use(errorHandler);
+
+  const port = process.env.PORT || 3001;
+
+  app.listen(port, () => {
+    console.log(`Server rodando na porta ${port}`);
+  });
+}
+bootstrap().catch((error) => {
+  logger.error("Erro ao iniciar o servidor:", error);
+  process.exit(1);
 });
