@@ -33,8 +33,13 @@ class TipoRegistroRepository implements ITipoRegistroRepository {
       return tipoRegistro;
     }
   }
-  createByName(nome: string): Promise<TipoRegistro> {
-    throw new Error("Method not implemented.");
+  async createByName(nome: string): Promise<TipoRegistro> {
+    const newTipoRegistro = await prisma.tipoRegistro.create({
+      data: {
+        tipo: nome,
+      },
+    });
+    return newTipoRegistro;
   }
   findById(id: string): Promise<TipoRegistro> {
     throw new Error("Method not implemented.");
