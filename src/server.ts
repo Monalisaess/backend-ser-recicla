@@ -1,15 +1,19 @@
 import express from "express";
-import { Router, Request, Response } from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import router from "./routes/cadastrados";
+import authRouter from "./routes/auth";
 
-const server = express();
-const router = Router();
+dotenv.config();
 
-server.use(express.json());
+const app = express();
+app.use(express.json());
+app.use(cors());
+app.use("/cadastrados", router);
+app.use("/auth", authRouter);
 
-router.get("/", (req: Request, res: Response) => {
-  res.json({ message: "Hello world" });
+const port = process.env.PORT || 3001;
+
+app.listen(port, () => {
+  console.log(`Server rodando na porta ${port}`);
 });
-
-server.use(router);
-
-server.listen(8080, () => "server online on port 8080");
