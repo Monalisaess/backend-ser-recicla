@@ -1,19 +1,37 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import router from "./routes/cadastrados";
-import authRouter from "./routes/auth";
+import errorHandler from "./middlewares/ErrorHandler";
+import { routes } from "./modules/shared/http/routes/routes";
+import initializeDatabase from "./database/initDb";
+import Logger from "./modules/shared/utils/Logger";
 
-dotenv.config();
+const logger = new Logger("server.ts");
 
-const app = express();
-app.use(express.json());
-app.use(cors());
-app.use("/cadastrados", router);
-app.use("/auth", authRouter);
+async function bootstrap(): Promise<void> {
+  dotenv.config();
 
-const port = process.env.PORT || 3001;
+  const app = express();
+  app.use(express.json());
+  app.use(cors());
 
-app.listen(port, () => {
-  console.log(`Server rodando na porta ${port}`);
+  await initializeDatabase();
+
+  //rotas
+  logger.info("Iniciando rotas...");
+  app.use(routes);
+
+  //midlewares
+  logger.info("Iniciando middlewares...");
+  app.use(errorHandler);
+
+  const port = process.env.PORT || 3001;
+
+  app.listen(port, () => {
+    logger.info(`Server rodando na porta ${port}`);
+  });
+}
+bootstrap().catch((error) => {
+  logger.error("Erro ao iniciar o servidor:", error);
+  process.exit(1);
 });
