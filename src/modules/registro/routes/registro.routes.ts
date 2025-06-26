@@ -1,4 +1,4 @@
-import Router from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { RegistroController } from "../controllers/RegistroController";
 import { RegistroService } from "../services/RegistroService";
 import { RegistroRepository } from "../repository/RegistroRepository";
@@ -26,8 +26,12 @@ const registroService = new RegistroService(
 
 const registroController = new RegistroController(registroService);
 
-registroRouter.post("/", (req, res, next) =>
-  registroController.createRegistro(req, res, next),
-);
+registroRouter.post("/", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await registroController.createRegistro(req, res, next);
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default registroRouter;

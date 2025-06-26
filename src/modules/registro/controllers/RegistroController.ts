@@ -18,7 +18,7 @@ class RegistroController {
     req: Request,
     res: Response,
     nextFunction: NextFunction,
-  ) {
+  ): Promise<Response | void> {
     console.info("REGISTRANDO REGISTROS...");
     try {
       const dto: CreateRegistrosDTO = createRegistrosSchema.parse(req.body);

@@ -20,6 +20,20 @@ export default async function initializeDatabase(): Promise<void> {
 
       // --- LOGICA DE INICIALIZAÇÃO AQUI ---
       // Exemplo: Criar tipos de registro padrão se não existirem
+
+      //cria usuário admin caso não exista
+      const defaultAdmin = {
+        email: "admin@ser-recicla.com.br",
+        nome: "admin",
+        senha: "admin@SerRecicla1232",
+      };
+      
+      await prisma.users.upsert({
+        where: { email: defaultAdmin.email },
+        update: {},
+        create: defaultAdmin,
+      });
+      logger.info("USUÁRIO ADMIN PADRÃO CRIADO");
       const defaultTipoRegistros = [
         { tipo: 'LATA' },
         { tipo: 'PLASTICO' },

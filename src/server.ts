@@ -18,17 +18,17 @@ async function bootstrap(): Promise<void> {
   await initializeDatabase();
 
   //rotas
-  console.log("Iniciando rotas...");
+  logger.info("Iniciando rotas...");
   app.use(routes);
 
   //midlewares
-  console.log("Iniciando middlewares...");
+  logger.info("Iniciando middlewares...");
   app.use(errorHandler);
 
   const port = process.env.PORT || 3001;
 
   app.listen(port, () => {
-    console.log(`Server rodando na porta ${port}`);
+    logger.info(`Server rodando na porta ${port}`);
   });
 }
 bootstrap().catch((error) => {
