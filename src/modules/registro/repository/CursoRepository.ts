@@ -18,6 +18,19 @@ class CursoRepository implements ICursoRepository {
       return result;
     }
   }
+
+  async getRegistrosDoCurso(idCurso: number) {
+    const registros = await prisma.registro.findMany({
+      where: {
+        id_curso: idCurso,
+      },
+      include: {
+        tipo: true, // inclui informações do tipo de registro
+      },
+    });
+
+    return registros;
+  }
 }
 
 export { CursoRepository };
