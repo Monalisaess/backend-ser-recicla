@@ -4,23 +4,25 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 const router = Router();
 
-router.post("/login", async (req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ error: "Email e senha são obrigatórios" });
+    res.status(400).json({ error: "Email e senha são obrigatórios" });
+    return;
   }
 
   try {
-    const user = await prisma.user.findFirst({
+    const user = await prisma.users.findFirst({
       where: {
-        email,
-        password,
+        email: email,
+        senha: password,
       },
     });
 
     if (!user) {
-      return res.status(401).json({ error: "Credenciais inválidas" });
+      res.status(401).json({ error: "Credenciais inválidas" });
+      return;
     }
 
     res.status(200).json({
