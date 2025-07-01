@@ -1,10 +1,14 @@
 import { IRegistroRepository } from "../repository/IRegistroRepository";
-import { CreateRegistrosDTO, RegistroDTO, CreateRegistroInput } from "../dtos/RegistroDTOs";
+import {
+  CreateRegistrosDTO,
+  RegistroDTO,
+  CreateRegistroInput,
+} from "../dtos/RegistroDTOs";
 import { CursoService } from "./CursoService";
 import { TipoRegistroService } from "../../tipo_registro/services/TipoRegistroService";
-import APIError from '../../shared/errors/APIError';
+import APIError from "../../shared/errors/APIError";
 import { Registro, TipoRegistro } from "@prisma/client";
-import Logger from '../../shared/utils/Logger';
+import Logger from "../../shared/utils/Logger";
 
 class RegistroService {
   private readonly registroRepository: IRegistroRepository;
@@ -31,52 +35,75 @@ class RegistroService {
     this.logger.info("CURSO ENCONTRADO");
 
     this.logger.info("CONSULTANDO TIPOS DE REGISTRO");
-    const tipoRegistrosSet = [...new Set(registros.map((r) => r.tipo_registro))];
+
+    const tipoRegistrosSet = [
+      ...new Set(registros.map((r: any) => r.tipo_registro)),
+    ];
 
     this.logger.info("BUSCANDO OU CRIANDO TIPOS DE REGISTRO");
     const tipoRegistrosFetch: TipoRegistro[] = [];
     for (const tr of tipoRegistrosSet) {
-      const tipoRegistro: TipoRegistro = await this.tipoRegistroService.findOrCreate(tr);
+      const tipoRegistro: TipoRegistro =
+        await this.tipoRegistroService.findOrCreate(tr as string);
       tipoRegistrosFetch.push(tipoRegistro);
     }
 
     const mapTipoRegistro = new Map<string, number>();
-    tipoRegistrosFetch.forEach(tr => {
+    tipoRegistrosFetch.forEach((tr) => {
       mapTipoRegistro.set(tr.tipo, tr.id_tipo_registro);
     });
 
+    //verifica se todos os  tiposRegistros estão presentes
     for (const tr of registros) {
       if (!mapTipoRegistro.has(tr.tipo_registro)) {
-        throw new APIError(`O Tipo Registro ${tr.tipo_registro} não foi encontrado.`, 404);
+        throw new APIError(
+          `O Tipo Registro ${tr.tipo_registro} não foi encontrado.`,
+          404,
+        );
       }
     }
 
     this.logger.info("PREPARANDO REGISTROS PARA INSERÇÃO");
-    const registrosParaInserir: CreateRegistroInput[] = registros.map((tr) => {
-      const idTipoRegistro = mapTipoRegistro.get(tr.tipo_registro);
-      if (idTipoRegistro === undefined) {
-        this.logger.error("ERRO AO ENCONTRAR O ID DO TIPO REGISTRO");
-        throw new APIError(`Tipo de registro '${tr.tipo_registro}' não encontrado.`, 404);
-      }
 
-      return {
-        quantidade: tr.quantidade,
-        unidade: tr.unidade === "G" ? "GRAMAS" : "UNIDADES",
-        id_curso: cursoFetch.id_curso,
-        id_tipo_registro: idTipoRegistro,
-      };
-    });
+    const registrosParaInserir: CreateRegistroInput[] = registros.map(
+      (tr: any) => {
+        const idTipoRegistro = mapTipoRegistro.get(tr.tipo_registro);
+
+        if (idTipoRegistro === undefined) {
+          this.logger.error("ERRO AO ENCONTRAR O ID DO TIPO REGISTRO");
+          throw new APIError(
+            `Tipo de registro '${tr.tipo_registro}' não encontrado.`,
+            404,
+          );
+        }
+
+        return {
+          quantidade: tr.quantidade,
+          unidade: tr.unidade === "G" ? "GRAMAS" : "UNIDADES",
+          id_curso: cursoFetch.id_curso,
+          id_tipo_registro: idTipoRegistro,
+        };
+      },
+    );
 
     this.logger.info("INSERINDO REGISTROS NO BANCO DE DADOS");
-    const dadosInseridos: Registro[] = await this.registroRepository.createRegistros(registrosParaInserir);
+    const dadosInseridos: Registro[] =
+      await this.registroRepository.createRegistros(registrosParaInserir);
 
+    //mapeia para retorno
     this.logger.info("MAPEANDO RETORNO");
-    const mappedRegistros: RegistroDTO[] = dadosInseridos.map(registro => {
-      const tipoRegistroNome = tipoRegistrosFetch.find(tr => tr.id_tipo_registro === registro.id_tipo_registro);
+    const mappedRegistros: RegistroDTO[] = dadosInseridos.map((registro) => {
+      //encontra nome do registro pelo id
+      const tipoRegistroNome = tipoRegistrosFetch.find(
+        (tr) => tr.id_tipo_registro === registro.id_tipo_registro,
+      );
 
       if (!tipoRegistroNome) {
         this.logger.error("ERRO AO MAPEAR RETORNO");
-        throw new APIError("Ocorreu um erro no retorno do registro, contate os desenvolvedores", 500);
+        throw new APIError(
+          "Ocorreu um erro no retorno do registro, contate os desenvolvedores",
+          500,
+        );
       }
 
       return {

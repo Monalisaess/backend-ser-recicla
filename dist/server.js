@@ -23,7 +23,6 @@ const logger = new Logger_1.default("server.ts");
 function bootstrap() {
     return __awaiter(this, void 0, void 0, function* () {
         dotenv_1.default.config();
-        console.log(process.env.DATABASE_URL);
         const app = (0, express_1.default)();
         app.use(express_1.default.json());
         app.use((0, cors_1.default)());

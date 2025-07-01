@@ -1,4 +1,4 @@
-import { ICursoRepository } from "../repository/ICursoRepository";
+import { ICursoRepository } from "../repository/ICursoRepository"; 
 import { Curso } from "@prisma/client";
 
 class CursoService {
@@ -13,6 +13,10 @@ class CursoService {
     const curso = await this.cursoRepository.findByNome(nome);
 
     return curso;
+  }
+
+  public async getRegistrosDoCurso(idCurso: number) {
+    return this.cursoRepository.getRegistrosDoCurso(idCurso);
   }
 }
 
