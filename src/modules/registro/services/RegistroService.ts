@@ -29,18 +29,17 @@ class RegistroService {
 
   async createRegistros(data: CreateRegistrosDTO): Promise<RegistroDTO[]> {
     const { curso, registros } = data;
-    //verifica se o curso existe
+
     this.logger.info("VERIFICANDO SE O CURSO EXISTE");
     const cursoFetch = await this.cursoService.getCursoByNome(curso);
     this.logger.info("CURSO ENCONTRADO");
 
-    //consulta tipos registro
     this.logger.info("CONSULTANDO TIPOS DE REGISTRO");
+
     const tipoRegistrosSet = [
       ...new Set(registros.map((r: any) => r.tipo_registro)),
     ];
 
-    //pegar os ids dos tipo_registro, cria caso os mesmos não forem achados
     this.logger.info("BUSCANDO OU CRIANDO TIPOS DE REGISTRO");
     const tipoRegistrosFetch: TipoRegistro[] = [];
     for (const tr of tipoRegistrosSet) {
@@ -64,8 +63,8 @@ class RegistroService {
       }
     }
 
-    //prepara dados para inserção
     this.logger.info("PREPARANDO REGISTROS PARA INSERÇÃO");
+
     const registrosParaInserir: CreateRegistroInput[] = registros.map(
       (tr: any) => {
         const idTipoRegistro = mapTipoRegistro.get(tr.tipo_registro);
@@ -87,7 +86,6 @@ class RegistroService {
       },
     );
 
-    //inserir dados
     this.logger.info("INSERINDO REGISTROS NO BANCO DE DADOS");
     const dadosInseridos: Registro[] =
       await this.registroRepository.createRegistros(registrosParaInserir);
@@ -107,6 +105,7 @@ class RegistroService {
           500,
         );
       }
+
       return {
         id: registro.id_registro,
         tipo_registro: tipoRegistroNome.tipo,
@@ -118,6 +117,30 @@ class RegistroService {
     });
 
     return mappedRegistros;
+  }
+
+  public async getRankingCursos(): Promise<{ nome: string; totalReciclado: number }[]> {
+    const registros = await this.registroRepository.getAllWithCurso();
+
+    const rankingMap = new Map<string, { nome: string; totalReciclado: number }>();
+
+    registros.forEach(registro => {
+      const cursoId = registro.curso.id_curso;
+      const cursoNome = registro.curso.nome_curso;
+      const quantidade = registro.quantidade.toNumber();
+
+      if (!rankingMap.has(cursoId)) {
+        rankingMap.set(cursoId, {
+          nome: cursoNome,
+          totalReciclado: 0,
+        });
+      }
+
+      const item = rankingMap.get(cursoId);
+      if (item) item.totalReciclado += quantidade;
+    });
+
+    return Array.from(rankingMap.values());
   }
 }
 

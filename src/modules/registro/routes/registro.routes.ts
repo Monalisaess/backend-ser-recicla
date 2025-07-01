@@ -9,8 +9,7 @@ import { TipoRegistroRepository } from "../../tipo_registro/repository/TipoRegis
 
 const registroRouter = Router();
 
-// initialize Controller
-
+// Inicializa dependências
 const cursoRepository = new CursoRepository();
 const cursoService = new CursoService(cursoRepository);
 
@@ -26,9 +25,18 @@ const registroService = new RegistroService(
 
 const registroController = new RegistroController(registroService);
 
+// Rota para criação de registros
 registroRouter.post("/", async (req: Request, res: Response, next: NextFunction) => {
   try {
     await registroController.createRegistro(req, res, next);
+  } catch (error) {
+    next(error);
+  }
+});
+
+registroRouter.get("/curso/ranking", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await registroController.getRanking(req, res, next);
   } catch (error) {
     next(error);
   }
