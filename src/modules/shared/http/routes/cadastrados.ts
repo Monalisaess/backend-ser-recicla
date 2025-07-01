@@ -1,5 +1,6 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
+import { createContext } from "vm";
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -12,10 +13,11 @@ interface UserRequest extends Request {
   };
 }
 
-router.post("/", async (req: UserRequest, res: Response) => {
+router.post("/", async (req: UserRequest, res: Response, next: NextFunction): Promise<void> => {
   const { email, nome, senha } = req.body;
   if (!email || !nome || !senha) {
-    return res.status(400).json({ error: "Email, nome e senha obrigatórios" });
+    res.status(400).json({ error: "Email, nome e senha obrigatórios" });
+    return;
   }
 
   try {
@@ -28,9 +30,9 @@ router.post("/", async (req: UserRequest, res: Response) => {
     });
 
     res.status(200).json(newUser);
+    return;
   } catch (err) {
-    console.error("Erro ao cadastrar:", err);
-    res.status(500).json({ error: "Erro no cadastro" });
+    next(err);
   }
 });
 
