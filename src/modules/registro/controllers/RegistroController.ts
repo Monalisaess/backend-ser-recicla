@@ -24,9 +24,25 @@ class RegistroController {
       const dto: CreateRegistrosDTO = createRegistrosSchema.parse(req.body);
       const response = await this.registroService.createRegistros(dto);
 
-      return res.json({ message: "Registros Feitos com sucesso!", registros: response });
+      return res.json({
+        message: "Registros Feitos com sucesso!",
+        registros: response,
+      });
     } catch (error) {
       nextFunction(error);
+    }
+  }
+
+  public async getRanking(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const ranking = await this.registroService.getRankingCursos();
+      res.status(200).json(ranking);
+    } catch (error) {
+      next(error);
     }
   }
 }

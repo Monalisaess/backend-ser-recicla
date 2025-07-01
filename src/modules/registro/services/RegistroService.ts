@@ -25,70 +25,60 @@ class RegistroService {
 
   async createRegistros(data: CreateRegistrosDTO): Promise<RegistroDTO[]> {
     const { curso, registros } = data;
-    //verifica se o curso existe
+
     this.logger.info("VERIFICANDO SE O CURSO EXISTE");
     const cursoFetch = await this.cursoService.getCursoByNome(curso);
-    this.logger.info("CURSO ENCONTRADO")
+    this.logger.info("CURSO ENCONTRADO");
 
-    //consulta tipos registro
     this.logger.info("CONSULTANDO TIPOS DE REGISTRO");
-    const tipoRegistrosSet = [
-      ...new Set(registros.map((r) => r.tipo_registro)),
-    ];
+    const tipoRegistrosSet = [...new Set(registros.map((r) => r.tipo_registro))];
 
-    //pegar os ids dos tipo_registro, cria caso os mesmos não forem achados
     this.logger.info("BUSCANDO OU CRIANDO TIPOS DE REGISTRO");
-    const tipoRegistrosFetch: TipoRegistro[] = []
+    const tipoRegistrosFetch: TipoRegistro[] = [];
     for (const tr of tipoRegistrosSet) {
       const tipoRegistro: TipoRegistro = await this.tipoRegistroService.findOrCreate(tr);
       tipoRegistrosFetch.push(tipoRegistro);
     }
-    
 
     const mapTipoRegistro = new Map<string, number>();
     tipoRegistrosFetch.forEach(tr => {
       mapTipoRegistro.set(tr.tipo, tr.id_tipo_registro);
     });
 
-      //verifica se todos os  tiposRegistros estão presentes
-    for(const tr of registros) {
+    for (const tr of registros) {
       if (!mapTipoRegistro.has(tr.tipo_registro)) {
         throw new APIError(`O Tipo Registro ${tr.tipo_registro} não foi encontrado.`, 404);
       }
     }
 
-    //prepara dados para inserção
     this.logger.info("PREPARANDO REGISTROS PARA INSERÇÃO");
     const registrosParaInserir: CreateRegistroInput[] = registros.map((tr) => {
       const idTipoRegistro = mapTipoRegistro.get(tr.tipo_registro);
-  
       if (idTipoRegistro === undefined) {
         this.logger.error("ERRO AO ENCONTRAR O ID DO TIPO REGISTRO");
         throw new APIError(`Tipo de registro '${tr.tipo_registro}' não encontrado.`, 404);
       }
-      
+
       return {
         quantidade: tr.quantidade,
         unidade: tr.unidade === "G" ? "GRAMAS" : "UNIDADES",
         id_curso: cursoFetch.id_curso,
         id_tipo_registro: idTipoRegistro,
-      }
+      };
     });
 
-    //inserir dados
     this.logger.info("INSERINDO REGISTROS NO BANCO DE DADOS");
     const dadosInseridos: Registro[] = await this.registroRepository.createRegistros(registrosParaInserir);
-    
-    //mapeia para retorno
+
     this.logger.info("MAPEANDO RETORNO");
     const mappedRegistros: RegistroDTO[] = dadosInseridos.map(registro => {
-      //encontra nome do registro pelo id
       const tipoRegistroNome = tipoRegistrosFetch.find(tr => tr.id_tipo_registro === registro.id_tipo_registro);
 
-      if(!tipoRegistroNome) {
+      if (!tipoRegistroNome) {
         this.logger.error("ERRO AO MAPEAR RETORNO");
         throw new APIError("Ocorreu um erro no retorno do registro, contate os desenvolvedores", 500);
       }
+
       return {
         id: registro.id_registro,
         tipo_registro: tipoRegistroNome.tipo,
@@ -97,9 +87,33 @@ class RegistroService {
         unidade: registro.unidade.toString(),
         timestamp: registro.timestamp.toISOString(),
       };
-    })
+    });
 
     return mappedRegistros;
+  }
+
+  public async getRankingCursos(): Promise<{ nome: string; totalReciclado: number }[]> {
+    const registros = await this.registroRepository.getAllWithCurso();
+
+    const rankingMap = new Map<string, { nome: string; totalReciclado: number }>();
+
+    registros.forEach(registro => {
+      const cursoId = registro.curso.id_curso;
+      const cursoNome = registro.curso.nome_curso;
+      const quantidade = registro.quantidade.toNumber();
+
+      if (!rankingMap.has(cursoId)) {
+        rankingMap.set(cursoId, {
+          nome: cursoNome,
+          totalReciclado: 0,
+        });
+      }
+
+      const item = rankingMap.get(cursoId);
+      if (item) item.totalReciclado += quantidade;
+    });
+
+    return Array.from(rankingMap.values());
   }
 }
 
